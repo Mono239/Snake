@@ -1,0 +1,118 @@
+<canvas id=canvas height=400 width=600>
+</canvas>
+
+<script>
+function Juego(){
+	this.ctx = canvas.getContext("2d")
+	this.escala = 20
+	this.nx = Math.floor(canvas.width/this.escala)
+	this.ny = Math.floor(canvas.height/this.escala)
+
+	this.comida = new Comida()
+	this.snake = new Snake()
+
+	this.Rect = function(x,y,w,h,c){
+		this.ctx.fillStyle = c
+		this.ctx.fillRect(x*this.escala,y*this.escala,w*this.escala-1,h*this.escala-1)
+	}
+
+	this.paso = function(){
+		this.comida.paso(this)
+		this.snake.paso(this)
+
+		this.dibujar()
+		this.esperar()
+	}
+	
+	this.dibujar = function(){
+		this.Rect(0,0,this.nx,this.ny,	"#46e8e0")
+		this.snake.dibujar(this)
+		this.comida.dibujar(this)	
+	}
+	this.esperar = function(){
+		setTimeout(this.paso.bind(this), 1000/25)
+	}
+
+	this.keydown = function(evt){
+		this.snake.keydown(evt.key)
+}
+
+	document.addEventListener('keydown', this.keydown.bind(this))
+	this.esperar()
+}
+
+function Snake(){
+	this.l = 2
+	this.sombra = []
+	this.x = 10
+	this.y = 10
+	this.vx = 1
+	this.vy = 0
+
+	this.keydown = function(key){
+	if(key == "ArrowDown"){
+		this.vx = 0
+		this.vy = 1
+	}	
+	else if(key == "ArrowUp"){
+		this.vx = 0
+		this.vy = -1
+	}	
+	else if(key == "ArrowLeft"){
+		this.vx = -1
+		this.vy = 0
+	}
+	else if(key == "ArrowRight"){
+		this.vx = 1
+		this.vy = 0
+	}
+}
+	this.paso = function(juego){
+		this.x = this.x + this.vx
+		this.y = this.y + this.vy
+
+		if(this.x >= juego.nx) this.x = 0 
+		if(this.y >= juego.ny) this.y = 0
+		if(this.x < 0 )this.x = juego.nx - 1
+		if(this.y < 0 )this.y = juego.ny - 1
+
+		for(var i=0; i<this.sombra.length; i++){
+			var pos = this.sombra[i]
+			if (pos.x == juego.comida.x && pos.y == juego.comida.y ){
+				this.l = this.l + 1
+				juego.comida.reset(juego)		
+	}
+	if(pos.x == this.x && this.y == pos.y) this.l = 2
+}
+
+		this.sombra.push({x:this.x, y:this.y})
+		while(this.sombra.length > this.l)
+			this.sombra.shift()
+	}
+	this.dibujar = function(juego){
+		for(var i=0; i<this.sombra.length; i++){
+			var pos = this.sombra[i]
+		juego.Rect(pos.x, pos.y, 1, 1, "white")
+		}
+	}
+}
+function Comida(){
+	this.x = 13
+	this.y = 14
+	
+	this.reset = function (juego){
+		this.x = Math.floor(Math.random()*juego.nx)
+		this.y = Math.floor(Math.random()*juego.ny)
+}
+
+	this.paso = function(juego){
+	}
+	this.dibujar = function(juego){
+		juego.Rect(this.x, this.y, 1, 1,	"red")
+	}
+}
+window.onload = function(){
+	new Juego()
+}
+
+</script>
